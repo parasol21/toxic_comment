@@ -5,18 +5,23 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, Dense, Dropout, Flatten, MaxPooling1D, Input, Concatenate
 
 class TextCNN(object):
-    def __init__(self, classes, config):
+    def __init__(self, classes, config, pretrained_embedding):
         self.models = {}
         self.classes = classes
         self.num_class = len(classes)
         self.config = config
-        self.model = self._build()
+        self.model = self._build(pretrained_embedding)
 
-    def _build(self):
+    def _build(self, pretrained_embedding):
         model = Sequential()
-        model.add(Embedding(self.config['vocab_size'], self.config['embedding_dim'],
-                            input_length=self.config['maxlen'],
-                            embeddings_initializer="uniform", trainable=True))
+        if pretrained_embedding is not None:
+            model.add(Embedding(self.config['vocab_size'], self.config['embedding_dim'],
+                                weights=[pretrained_embedding],
+                                input_length=self.config['maxlen'], trainable=False))
+        else:
+            model.add(Embedding(self.config['vocab_size'], self.config['embedding_dim'],
+                                input_length=self.config['maxlen'],
+                                embeddings_initializer="uniform", trainable=True))
         model.add(Conv1D(128, 7, activation='relu', padding='same'))
         model.add(MaxPooling1D())
         model.add(Conv1D(256, 5, activation='relu', padding='same'))

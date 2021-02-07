@@ -1,11 +1,12 @@
 training:
   model_name: 'textcnn'
   learning_rate: 0.8
-  embedding_dim: 100
   maxlen: 128
   batch_size: 32
   epochs : 1
+  embedding_dim: 100
 preprocessing:
   input_convertor: 'nn_vectorization'
-  embedding_dim: 100
+  pretrained_embedding: '../../glove.twitter.27B.100d.txt'
   maxlen: 128
+  embedding_dim: 100

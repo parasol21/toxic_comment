@@ -1,3 +1,4 @@
+import io
 import re
 import string
 import pandas as pd
@@ -101,21 +102,35 @@ class Preprocessor(object):
     def nn_vectorization(self, train_x, validate_x, test_x):
         self.word2ind = {}
         self.ind2word = {}
-
         specialtokens = ['<pad>', '<unk>']
 
-        def addword(word2ind, ind2word, word):
-            if word in word2ind:
-                return
-            ind2word[len(word2ind)] = word
-            word2ind[word] = len(word2ind)
+        pretrained_embedding = self.config.get('pretrained_embedding', None)
 
-        for token in specialtokens:
-            addword(self.word2ind, self.ind2word, token)
+        if pretrained_embedding is not None:
+            word2embedding = Preprocessor.load_vectors(pretrained_embedding)
+            vocabs = specialtokens + list(word2embedding.keys())
+            vocabs_size = len(vocabs)
+            self.embedding_matrix = np.zeros((vocabs_size, self.config['embedding_dim']))
+            for token in specialtokens:
+                word2embedding[token] = np.random.uniform(low=-1, high=1,
+                                                          size=(self.config['embedding_dim'],))
+            for idx, word in enumerate(vocabs):
+                self.word2ind[word] = idx
+                self.ind2word[idx] = word
+                self.embedding_matrix[idx] = word2embedding[word]
+        else:
+            def addword(word2ind, ind2word, word):
+                if word in word2ind:
+                    return
+                ind2word[len(word2ind)] = word
+                word2ind[word] = len(word2ind)
 
-        for sent in train_x:
-            for word in sent:
-                addword(self.word2ind, self.ind2word, word)
+            for token in specialtokens:
+                addword(self.word2ind, self.ind2word, token)
+
+            for sent in train_x:
+                for word in sent:
+                    addword(self.word2ind, self.ind2word, word)
 
         train_x_ids = []
         for sent in train_x:
@@ -147,5 +162,13 @@ class Preprocessor(object):
 
         return train_x_ids, validate_x_ids, test_x_ids
 
-
+    @staticmethod
+    def load_vectors(fname):
+        fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+        # n, d = map(int, fin.readline().split())
+        data = {}
+        for line in fin:
+            tokens = line.rstrip().split(' ')
+            data[tokens[0]] = np.array(list(map(float, tokens[1:])))
+        return data
 

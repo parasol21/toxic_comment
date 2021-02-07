@@ -3,17 +3,18 @@ from sklearn.metrics import classification_report
 from module.model import NaiveBayer, TextCNN
 
 class Trainer(object):
-    def __init__(self, config, logger, classes):
+    def __init__(self, config, logger, classes, pretrained_embedding):
         self.config = config
         self.logger = logger
         self.classes = classes
+        self.pretrained_embedding = pretrained_embedding
         self._create_model(classes)
 
     def _create_model(self, classes):
         if self.config['model_name'] == 'naivebayse':
             self.model = NaiveBayer(classes)
         elif self.config['model_name'] == 'textcnn':
-            self.model = TextCNN(classes, self.config)
+            self.model = TextCNN(classes, self.config, self.pretrained_embedding)
         else:
             self.logger.warning("Model Type:{} is not support yet".format(self.config['model_name']))
 

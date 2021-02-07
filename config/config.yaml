@@ -13,6 +13,7 @@ preprocessing:
   input_text_column: comment_text
   input_trainset: ../../train.csv/train.csv
   maxlen: 128
+  pretrained_embedding: ../../glove.twitter.27B.100d.txt
   random_seed: 0
   split_ratio: 0.3
 training:

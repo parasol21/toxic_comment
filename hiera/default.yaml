@@ -12,12 +12,16 @@ preprocessing:
     - 'identity_hate'
   input_text_column: 'comment_text'
   input_id_column: 'id'
+  maxlen: 128
 training:
   learning_rate: 1.0
   dropout_rate: 0.5
   batch_normalization: True
   optimizer: 'sgd'
-  epochs: 10
+  epochs: 1
   gradient_cliping: True
+  batch_size: 32
+  embedding_dim: 128
+  maxlen: 128
 predict:
   output_path: './data/submission.csv'
